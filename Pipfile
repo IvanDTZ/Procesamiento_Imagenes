@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 opencv-python-headless = "*"
 pyqt6 = "*"
+pillow = "*"
+numpy = "*"
+colormath = "*"
 
 [dev-packages]
 
