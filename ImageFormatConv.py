@@ -138,8 +138,11 @@ class ImageConverter(QWidget):
             pil_image.save(file_path)
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication(sys.argv)
     window = ImageConverter()
     window.show()
     sys.exit(app.exec())
+
+
+main()
