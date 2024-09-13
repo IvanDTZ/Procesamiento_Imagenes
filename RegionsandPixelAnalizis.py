@@ -15,6 +15,7 @@ class ImageGrid(QMainWindow):
         self.qimage = None
         self.grid_size = 10
         self.selected_pixel = None
+        self.connected_image = None
 
         self.image_label = QLabel(self)
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -23,10 +24,15 @@ class ImageGrid(QMainWindow):
         self.load_button = QPushButton('Cargar Imagen', self)
         self.load_button.clicked.connect(self.load_image)
 
+        self.download_button = QPushButton('Descargar Imagen', self)
+        self.download_button.clicked.connect(self.download_image)
+        self.download_button.setEnabled(False)
+
         self.main_layout = QVBoxLayout()
         self.main_layout.addWidget(self.image_label)
         self.main_layout.addWidget(self.info_label)
         self.main_layout.addWidget(self.load_button)
+        self.main_layout.addWidget(self.download_button)
 
         container = QWidget()
         container.setLayout(self.main_layout)
@@ -89,19 +95,30 @@ class ImageGrid(QMainWindow):
 
     def find_connected_regions(self):
         if self.selected_pixel is not None:
-            connected_image = np.zeros_like(self.image)
+            self.connected_image = np.zeros_like(self.image)
             connectivity = 8
 
-            _, connected_image, _, _ = cv2.floodFill(self.image.copy(
+            _, self.connected_image, _, _ = cv2.floodFill(self.image.copy(
             ), None, self.selected_pixel, 255, loDiff=10, upDiff=10, flags=connectivity)
 
-            height, width = connected_image.shape
+            height, width = self.connected_image.shape
             bytes_per_line = width
-            qimage_result = QImage(
-                connected_image.data, width, height, bytes_per_line, QImage.Format.Format_Grayscale8)
+            qimage_result = QImage(self.connected_image.data, width,
+                                   height, bytes_per_line, QImage.Format.Format_Grayscale8)
 
             pixmap = QPixmap.fromImage(qimage_result)
             self.image_label.setPixmap(pixmap)
+
+            self.download_button.setEnabled(True)
+
+    def download_image(self):
+        if self.connected_image is not None:
+            file_dialog = QFileDialog()
+            save_path, _ = file_dialog.getSaveFileName(
+                self, 'Guardar Imagen', '', 'Imagenes (*.png *.jpg *.bmp)')
+            if save_path:
+                cv2.imwrite(save_path, self.connected_image)
+                self.info_label.setText(f'Imagen guardada en {save_path}')
 
 
 app = QApplication(sys.argv)
