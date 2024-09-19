@@ -10,6 +10,7 @@ pillow = "*"
 numpy = "*"
 colormath = "*"
 opencv-python = "*"
+matplotlib = "*"
 
 [dev-packages]
 
